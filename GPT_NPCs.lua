@@ -3,6 +3,12 @@ path_to_history = "lua_scripts/elunamod-GPT_NPCs/"
 PATH_TO_OPENAI_EVENT = "lua_scripts/elunamod-GPT_NPCs/GPT_NPCs.py"
 temp_target_array = {}
 
+sterilize = {}
+function sterilize.onlyLetters(parameter)
+   newstring = tostring(string.gsub(parameter,"[^%a]","")) -- %a is all letters. ^ means negate. Replace with nothing = Replace everything but letters with nothing.
+   return newstring
+end
+
 function file_exists(name)
    local f=io.open(name,"r")
    if f~=nil then io.close(f) return true else return false end
