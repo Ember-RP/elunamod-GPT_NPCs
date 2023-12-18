@@ -12,6 +12,7 @@ try:
     account_name = sys.argv[3]
     dir_name = os.path.dirname(__file__)
     file_name = dir_name + "/" + character_name + "" + npc_name + ".history"
+    print(file_name)
     if os.path.exists(file_name) == True: # should always be true. we will create the file with LUA. we could use sys vars here in python instead, but it introduces security errors via user input when those characters are important to conversation
         history_file = open(file_name, "r")
         history_array = []
@@ -21,7 +22,7 @@ try:
             history_array.append(new_data)
         history_file.close()
 except:
-    print("[ChatGPT:Py]: Error in making the file_name variable. Is this python file in the same directory as the history files?")
+    print("[ChatGPT:Py]: Error in making the file_name variable. Is this python file in the same directory as the history files? Does the history file have newlines for some reason?")
 else:
     print("[ChatGPT:Py]: Successfully accessed and cached '" + file_name + "'.")
 
@@ -30,14 +31,14 @@ def Run_GPT():
         model="gpt-3.5-turbo",
         messages=history_array,
         presence_penalty=0, # bias to talk about new topics from -2.0 to 2.0
-        max_tokens=50, # max amount of word/character generation. can cut off chat
+        max_tokens=500, # max amount of word/character generation that the AI will use. model turbo-3.5 has a max of 4097 and it is possible for AI generated tokens + user generated tokens to reach this cap. this cap can cut off sentences.
         temperature=0.8, # What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic.
         user=account_name, # set the user/account here
     )
     
     try:
         active_file = open(file_name, "a")
-        string_to_append = "\n|" + response.choices[0].message.role + "|" + response.choices[0].message.content + "|"
+        string_to_append = "\n|" + response.choices[0].message.role + "|" + response.choices[0].message.content.replace('\n', '') + "|"
         active_file.write(string_to_append)
         active_file.close()
     except:
