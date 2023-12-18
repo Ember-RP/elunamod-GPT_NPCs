@@ -1,6 +1,6 @@
 OPENAI_ENABLED = "true"
-path_to_history = "lua_scripts/elunamod-GPT_NPCs/"
-PATH_TO_OPENAI_EVENT = "lua_scripts/elunamod-GPT_NPCs/GPT_NPCs.py"
+path_to_history = "lua_scripts/finished/elunamod-GPT_NPCs/"
+PATH_TO_OPENAI_EVENT = "lua_scripts/finished/elunamod-GPT_NPCs/GPT_NPCs.py"
 temp_target_array = {}
 
 sterilize = {}
@@ -12,6 +12,15 @@ end
 function file_exists(name)
    local f=io.open(name,"r")
    if f~=nil then io.close(f) return true else return false end
+end
+
+-- there is no native ToPlayer()/IsPlayer() function that is working in many other Eluna cores. This is an attempt to remedy that.
+function Is_Player(target)
+	if target:HasSpell(6603) == true then
+		return true
+	else
+		return false
+	end
 end
 
 local function SeekAIResponse(eventid, delay, repeats, player) -- any change in the file's content?
@@ -70,7 +79,7 @@ local function OnPlayerChat(event, player, msg, Type, lang)
 	end
 
 	local target = player:GetSelection()
-	if target == nil or target:IsPlayer() == true then -- is the player missing a target or is the target a player?
+	if target == nil or Is_Player(target) == true then -- is the player missing a target or is the target a player?
 		return
 	end
 
@@ -81,8 +90,11 @@ local function OnPlayerChat(event, player, msg, Type, lang)
 	if file_exists(path_to_history .. "" .. search_name .. ".history") == false then -- does file exist?
 		-- make new history file with "system" input passing our initial prompt that describes setting etc
 		local file = assert(io.open(file_name,"w"))
-		 -- THIS IS THE AI PROMPT, MARKED BY USER "SYSTEM"
-		local content = "You are " ..target:GetName().. " in WoW's Wrath of the Lich King and " ..player:GetName().. " a " ..player:GetRaceAsString().. " " ..player:GetClassAsString().. " approaches you saying '" .. msg .. "'. Respond with any of these commands: |say <text> |emote <text> |attack |move <x coordinate, y coordinate, z coordinate>. Separate multiple commands with vertical bars such as | and keep previous interactions in mind."
+		-- THIS IS THE AI PROMPT, MARKED BY USER "SYSTEM"
+		local npc_location = target:GetMap():GetName() -- let's try to get some info for the AI to use :)
+		local npc_location_sub = GetAreaName( target:GetAreaId() )
+		-- to do: pass time, npc gender / beast type, to AI
+		local content = "You are " ..target:GetName().. " located at " .. npc_location_sub .. ", " .. npc_location .. " and " ..player:GetName().. " a " ..player:GetRaceAsString().. " " ..player:GetClassAsString().. " approaches you saying '" .. msg .. "'. You can't act outside this role under any circumstances or use etiquette that may break character and immersion. You must roleplay all situations."
 		file:write("|system|" .. content .. "|")
 		file:write("\n|user|" .. msg .. "|")
 		file:close()
