@@ -47,7 +47,7 @@ local function SeekAIResponse(eventid, delay, repeats, player) -- any change in 
 	end
 
 	if result2[1] == "user" then -- no change found, the AI would be marked as "assistant", keep looping
-		player:RegisterEvent( SeekAIResponse, 1000 )
+		player:RegisterEvent( SeekAIResponse, 1000, 1)
 		return
 	end
 	
@@ -112,7 +112,7 @@ local function OnPlayerChat(event, player, msg, Type, lang)
 	
 	-- Begin a looping timer here to check for the results of the AI. Loop is every one second(s)
 	temp_target_array[player:GetName()] = {sterilize.onlyLetters(target:GetName()), target:GetEntry(), target:GetDBTableGUIDLow()} -- store the target in a global array because it cannot be accessed later. we will try to null this after its used.
-	player:RegisterEvent( SeekAIResponse, 1000 )
+	player:RegisterEvent( SeekAIResponse, 1000, 1)
 	return
 end
 
